@@ -1,0 +1,5 @@
+"main.obj",
+"ILI9163_lib.obj",
+"Delay_lib.obj" 
+TO "ILI9163_test" 
+PRINT(".\Listings\ILI9163_test.m51") RAMSIZE(256) 
