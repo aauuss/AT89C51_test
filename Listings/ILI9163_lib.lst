@@ -1,0 +1,188 @@
+C51 COMPILER V9.60.0.0   ILI9163_LIB                                                       10/15/2021 15:57:16 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ILI9163_LIB
+OBJECT MODULE PLACED IN ILI9163_lib.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ILI9163_lib.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\ILI9163_lib.lst) TABS(2)
+
+line level    source
+
+   1          #include "ILI9163_lib.h"
+   2          #include <ctype.h>
+   3          #include <intrins.h>
+   4          #include "Font16x16.h"
+   5          #include "Colors.h"
+   6          
+   7          #include "Delay_lib.h"
+   8          
+   9          unsigned int counter, _i, _j, _k;
+  10          
+  11          void LCD_endCom(void){
+  12   1        LCD_CS = 1;
+  13   1      }
+  14          
+  15          void LCD_SendCmd(unsigned int _cmd){
+  16   1        LCD_CS = 0;
+  17   1        LCD_DC = 0;
+  18   1      //  delay(2);
+  19   1        LCD_RD = 1; 
+  20   1        LCD_WR = 0;
+  21   1        P2 = _cmd & 0xFF;     //??  
+  22   1      //  delay(6);
+  23   1        LCD_WR = 1;
+  24   1      //  delay(6);
+  25   1      //  if (_cont == 0){
+  26   1      //    LCD_CS = 1;
+  27   1      //  }
+  28   1        P2 = 0xFF;
+  29   1      }
+  30          
+  31          void LCD_SendData(unsigned int _data){
+  32   1        LCD_CS = 0;
+  33   1        LCD_DC = 1;
+  34   1      //  delay(2);
+  35   1        LCD_RD = 1;
+  36   1        LCD_WR = 0;
+  37   1        P2 = _data & 0xFF;
+  38   1      //  delay(6);
+  39   1        LCD_WR = 1;
+  40   1      //  delay(6);
+  41   1      //  if (_cont == 0) {
+  42   1      //    LCD_CS = 1;
+  43   1      //  }
+  44   1      //  P2 = 0xFF;
+  45   1      }
+  46          
+  47          unsigned int LCD_readData(void){
+  48   1        unsigned int _data;
+  49   1        P2 = 0xff;
+  50   1        LCD_DC = 1;
+  51   1      //  delay(2);
+  52   1        LCD_CS = 0;
+  53   1      //  delay(2);
+  54   1        LCD_WR = 1;
+C51 COMPILER V9.60.0.0   ILI9163_LIB                                                       10/15/2021 15:57:16 PAGE 2   
+
+  55   1        LCD_RD = 0;
+  56   1      //  delay(5);
+  57   1        LCD_RD = 1;
+  58   1        _data = P2 & 0xFF;
+  59   1        
+  60   1      //  if (_cont == 0) {
+  61   1      //    LCD_CS = 1;
+  62   1      //  }
+  63   1        return _data; 
+  64   1      }
+  65          
+  66          void LCD_Init(void){
+  67   1        P2 = 0xFF;
+  68   1        delay(10);
+  69   1      
+  70   1        LCD_Reset();
+  71   1        delay(1000);
+  72   1        
+  73   1        LCD_SendCmd(0x01);
+  74   1        LCD_endCom();
+  75   1        delay(1000);
+  76   1      
+  77   1        LCD_SendCmd(0x11);
+  78   1        LCD_endCom();
+  79   1        delay(100);
+  80   1          
+  81   1        LCD_SendCmd(0x13);
+  82   1        LCD_endCom();
+  83   1        delay(100);
+  84   1            
+  85   1        LCD_SendCmd(0x3A);
+  86   1        LCD_SendData(0x66);
+  87   1        delay(10);
+  88   1            
+  89   1        LCD_SetColumn(0x00,0x7F);
+  90   1        delay(10);
+  91   1        LCD_SetPage(0x00,0x9F);
+  92   1        delay(10);
+  93   1            
+  94   1        LCD_SendCmd(0x36);
+  95   1        LCD_SendData(0xBC);
+  96   1        LCD_endCom();
+  97   1            
+  98   1        LCD_SendCmd(0x29);  
+  99   1        LCD_endCom();
+ 100   1        
+ 101   1        LCD_SendCmd(0xB1);
+ 102   1        LCD_SendData(0x03);
+ 103   1        LCD_SendData(0x01);
+ 104   1        LCD_endCom();
+ 105   1      }
+ 106          
+ 107          void LCD_SetColumn(unsigned int x_left, x_right){
+ 108   1        LCD_SendCmd(0x2A);
+ 109   1        LCD_SendData(0x00);//x_left >> 8, 1);
+ 110   1        LCD_SendData(x_left & 0xFF);
+ 111   1        LCD_SendData(0x00);//x_right >> 8, 1);
+ 112   1        LCD_SendData(x_right & 0xFF); 
+ 113   1        LCD_endCom();
+ 114   1      }
+ 115          
+ 116          void LCD_SetPage(unsigned int y_up, y_down){
+C51 COMPILER V9.60.0.0   ILI9163_LIB                                                       10/15/2021 15:57:16 PAGE 3   
+
+ 117   1        LCD_SendCmd(0x2B);
+ 118   1        LCD_SendData(0x00);//(y_up >> 8), 1);
+ 119   1        LCD_SendData((y_up & 0xFF));
+ 120   1        LCD_SendData(0x00);//(y_down >> 8), 1);
+ 121   1        LCD_SendData((y_down & 0xFF));
+ 122   1        LCD_endCom();
+ 123   1      }
+ 124          
+ 125          void LCD_Reset(void) {
+ 126   1        LCD_RESET = 0;
+ 127   1        LCD_RESET = 1;
+ 128   1      }
+ 129          
+ 130          void LCD_Clear(color _color){
+ 131   1        LCD_SetColumn(0, LCD_WIDTH);
+ 132   1        LCD_SetPage(0, LCD_HEIGHT);
+ 133   1        LCD_SendCmd(0x2C);
+ 134   1        for (counter = 0; counter < LCD_WIDTH * LCD_WIDTH - 1; counter++){
+ 135   2          LCD_SendData(_color.red);
+ 136   2          LCD_SendData(_color.green);
+ 137   2          LCD_SendData(_color.blue);
+ 138   2        }
+ 139   1      }
+ 140          
+ 141          void LCD_PrintChar(char _char,int _x,int _y,int _font_height, int _font_width, color _color){ 
+ 142   1        LCD_SetPage(_y, _y + _font_height - 1);
+ 143   1        LCD_SetColumn(_x, _x + _font_width - 1);
+ 144   1        LCD_SendCmd(0x2C);
+ 145   1        for (_j = 0; _j < (_font_height * _font_width >> 3) ; _j++){
+ 146   2          for (_k = 0; _k < 8; _k++){
+ 147   3            if (Font16x16[_char - 32][_j] & (1 << (7 -_k))){
+ 148   4              LCD_SendData(_color.red);
+ 149   4              LCD_SendData(_color.green);
+ 150   4              LCD_SendData(_color.blue);
+ 151   4            } else {
+ 152   4              LCD_SendData(0x00);
+ 153   4              LCD_SendData(0x00);
+ 154   4              LCD_SendData(0x00);     
+ 155   4            }
+ 156   3          }
+ 157   2        }
+ 158   1        LCD_endCom();
+ 159   1      
+ 160   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    590    ----
+   CONSTANT SIZE    =   3040    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     38      21
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
