@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\ILI9163_lib.obj" 
+TO ".\Objects\ILI9163_test" 
+PRINT(".\Listings\ILI9163_test.m51") RAMSIZE(256) 
